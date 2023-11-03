@@ -1,6 +1,6 @@
 
 export default function Home() {
   return (
-    <div>Hell</div>
+    <div className='p-12'>Hell</div>
   );
 }
