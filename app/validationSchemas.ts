@@ -6,6 +6,7 @@ export const issueSchema = z.object({
         .string()
         .min(1, "Description is required.")
         .max(65535),
+    priority: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
 });
 
 export const patchIssueSchema = z.object({
@@ -25,4 +26,10 @@ export const patchIssueSchema = z.object({
         .max(255)
         .optional()
         .nullable(),
+    status: z.enum(["OPEN", "IN_PROGRESS", "CLOSED"]).optional(),
+    priority: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
+});
+
+export const commentSchema = z.object({
+    text: z.string().min(1, "Comment is required.").max(65535),
 });

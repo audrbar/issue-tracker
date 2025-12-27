@@ -15,7 +15,26 @@ const IssuesPage = async ({ searchParams }: Props) => {
   const status = statuses.includes(searchParams.status)
     ? searchParams.status
     : undefined;
-  const where = { status };
+
+  // Build where clause with search and filters
+  const where: any = { status };
+
+  // Add search filter
+  if (searchParams.search) {
+    where.OR = [
+      { title: { contains: searchParams.search } },
+      { description: { contains: searchParams.search } },
+    ];
+  }
+
+  // Add assignee filter
+  if (searchParams.assignee) {
+    if (searchParams.assignee === "unassigned") {
+      where.assignedToUserId = null;
+    } else {
+      where.assignedToUserId = searchParams.assignee;
+    }
+  }
 
   const orderBy = columnNames
     .includes(searchParams.orderBy)
@@ -34,9 +53,14 @@ const IssuesPage = async ({ searchParams }: Props) => {
 
   const issueCount = await prisma.issue.count({ where });
 
+  // Fetch users for assignee filter
+  const users = await prisma.user.findMany({
+    orderBy: { name: 'asc' },
+  });
+
   return (
     <Flex direction="column" gap="3">
-      <IssueActions />
+      <IssueActions users={users} />
       <IssueTable searchParams={searchParams} issues={issues} />
       <Pagination
         pageSize={pageSize}
