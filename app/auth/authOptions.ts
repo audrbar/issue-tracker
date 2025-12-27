@@ -14,6 +14,10 @@ const authOptions: NextAuthOptions = {
     session: {
         strategy: 'jwt',
     },
+    // Dynamic URL based on environment
+    ...(process.env.NEXTAUTH_URL && {
+        url: process.env.NEXTAUTH_URL,
+    }),
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
