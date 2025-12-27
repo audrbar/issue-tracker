@@ -10,6 +10,8 @@ export interface IssueQuery {
   status: Status;
   orderBy: keyof Issue;
   page: string;
+  search?: string;
+  assignee?: string;
 }
 
 interface Props {

@@ -5,8 +5,8 @@ import { Select } from '@radix-ui/themes';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
-const statuses: { label: string; value?: Status }[] = [
-  { label: 'All' },
+const statuses: { label: string; value: string }[] = [
+  { label: 'All', value: 'all' },
   { label: 'Open', value: 'OPEN' },
   { label: 'In Progress', value: 'IN_PROGRESS' },
   { label: 'Closed', value: 'CLOSED' },
@@ -18,10 +18,10 @@ const IssueStatusFilter = () => {
 
   return (
     <Select.Root
-      defaultValue={searchParams.get('status') || ''}
+      defaultValue={searchParams.get('status') || 'all'}
       onValueChange={(status) => {
         const params = new URLSearchParams();
-        if (status) params.append('status', status);
+        if (status !== 'all') params.append('status', status);
         if (searchParams.get('orderBy'))
           params.append('orderBy', searchParams.get('orderBy')!);
 
@@ -34,7 +34,7 @@ const IssueStatusFilter = () => {
         {statuses.map((status) => (
           <Select.Item
             key={status.value}
-            value={status.value || ''}
+            value={status.value}
           >
             {status.label}
           </Select.Item>

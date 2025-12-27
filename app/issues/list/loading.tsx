@@ -7,7 +7,7 @@ const LoadingIssuesPage = () => {
 
   return (
     <div>
-      <IssueActions />
+      <IssueActions users={[]} />
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>

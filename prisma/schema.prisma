@@ -6,26 +6,54 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-  //relationMode = "prisma"
+  provider = "postgresql"
+  url = env("DATABASE_URL")
 }
 
 model Issue {
-  id               Int      @id @default(autoincrement())
-  title            String   @db.VarChar(255)
-  description      String   @db.Text
-  status           Status   @default(OPEN)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  assignedToUserId String?  @db.VarChar(255)
-  assignedToUser   User?    @relation(fields: [assignedToUserId], references: [id])
+  id               Int           @id @default(autoincrement())
+  title            String        @db.VarChar(255)
+  description      String        @db.Text
+  status           Status        @default(OPEN)
+  priority         Priority      @default(MEDIUM)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  assignedToUserId String?       @db.VarChar(255)
+  assignedToUser   User?         @relation(name: "AssignedIssues", fields: [assignedToUserId], references: [id])
+  createdByUserId  String?       @db.VarChar(255)
+  createdByUser    User?         @relation(name: "CreatedIssues", fields: [createdByUserId], references: [id])
+  comments         Comment[]
+  activityLogs     ActivityLog[]
+  labels           Label[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  issueId   Int
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Status {
   OPEN
   IN_PROGRESS
   CLOSED
+}
+
+enum Role {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 model Account {
@@ -56,14 +84,18 @@ model Session {
 }
 
 model User {
-  id             String    @id @default(cuid())
+  id             String        @id @default(cuid())
   name           String?
-  email          String?   @unique
+  email          String?       @unique
   emailVerified  DateTime?
   image          String?
+  role           Role          @default(USER)
   accounts       Account[]
   sessions       Session[]
-  assignedIssues Issue[]
+  assignedIssues Issue[]       @relation("AssignedIssues")
+  createdIssues  Issue[]       @relation("CreatedIssues")
+  comments       Comment[]
+  activityLogs   ActivityLog[]
 }
 
 model VerificationToken {
@@ -72,4 +104,22 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  action    String   @db.VarChar(255)
+  details   String?  @db.Text
+  createdAt DateTime @default(now())
+  issueId   Int
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Label {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique @db.VarChar(50)
+  color  String  @db.VarChar(7)
+  issues Issue[]
 }
